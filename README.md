@@ -4,7 +4,7 @@
 
 This repository contains a Python-based clone of JARVIS, the AI assistant from the Marvel movies. Inspired by Tony Stark's iconic virtual assistant, this project aims to recreate some of the advanced functionalities and interactions seen in the films.
 
-## ✨ Features
+## Features
 
 - **Whole PC Automation:** Control various aspects of your computer, such as opening applications and managing files.
 - **YouTube Automation:** Search for and play videos on YouTube.
@@ -15,31 +15,16 @@ This repository contains a Python-based clone of JARVIS, the AI assistant from t
 - **Music and Spotify Automation:** Control music playback and manage Spotify.
 - **Discord Automation:** Automate tasks on Discord.
 
-## 🛠 Technologies Used
+## Technologies Used
 
 - **Programming Language:** Python
-- **Libraries:** 
-  - `pyttsx3`
-  - `requests`
-  - `SpeechRecognition`
-  - `pyjokes`
-  - `pywhatkit`
-  - `pyaudio`
-  - `matplotlib`
-  - `cartopy`
-  - `wikipedia`
-  - `keyboard`
-  - `mouse`
-  - `pyautogui`
-  - `Pillow`
-  - `psutil`
-  - `pywikihow`
+- **Libraries:** `pyttsx3`, `requests`, `SpeechRecognition`, `pyjokes`, `pywhatkit`, `pyaudio`, `matplotlib`, `cartopy`, `wikipedia`, `keyboard`, `mouse`, `pyautogui`, `Pillow`, `psutil`, `pywikihow`
 
-## 🚀 Getting Started
+## Getting Started
 
 ### Prerequisites
 
-Ensure you have Python installed on your system. You can download it from [python.org](https://www.python.org/).
+Make sure you have Python installed on your system. You can download it from [python.org](https://www.python.org/).
 
 ### Installation
 
@@ -56,7 +41,7 @@ Ensure you have Python installed on your system. You can download it from [pytho
     pip install -r requirements.txt
     ```
 
-## 💻 How to Use
+### How to Use
 
 1. **Run the Application:**
     ```bash
@@ -70,27 +55,26 @@ Ensure you have Python installed on your system. You can download it from [pytho
       ```
     - Replace the default coordinates in the automation scripts with the coordinates you receive using the tool.
 
-### Voice Commands in `jarvis.py`
+3. **Voice Commands in `jarvis.py`:**
+    - **PC Automation:** 
+        - "Open [application]"
+        - "Create a file named [file name]"
+    - **YouTube Automation:** 
+        - "Play [video name] on YouTube"
+    - **Browser Automation:** 
+        - "Open [website name]"
+    - **WhatsApp Automation:** 
+        - "Send [message] to [contact name] on WhatsApp"
+    - **Weather Forecast:** 
+        - "What is the weather in [city name]?"
+    - **Space Info:** 
+        - "Tell me about [space topic]"
+    - **Music and Spotify Automation:** 
+        - "Play [song name] on Spotify"
+    - **Discord Automation:** 
+        - "Send [message] to [channel name] on Discord"
 
-- **PC Automation:** 
-    - "Open [application]"
-    - "Create a file named [file name]"
-- **YouTube Automation:** 
-    - "Play [video name] on YouTube"
-- **Browser Automation:** 
-    - "Open [website name]"
-- **WhatsApp Automation:** 
-    - "Send [message] to [contact name] on WhatsApp"
-- **Weather Forecast:** 
-    - "What is the weather in [city name]?"
-- **Space Info:** 
-    - "Tell me about [space topic]"
-- **Music and Spotify Automation:** 
-    - "Play [song name] on Spotify"
-- **Discord Automation:** 
-    - "Send [message] to [channel name] on Discord"
-
-## 🖱 Mouse Click Coordinates Tool
+## Mouse Click Coordinates Tool
 
 To run some automations, you may need to find the coordinates of mouse clicks. This repository includes a tool to help with this.
 
@@ -103,20 +87,14 @@ To run some automations, you may need to find the coordinates of mouse clicks. T
 3. **Update the Automation Scripts:**
     - Replace the default coordinates in the scripts with the coordinates obtained from the tool.
 
-## 🤝 Contributing
+## Contributing
 
-Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
+We welcome contributions to make JARVIS even more powerful! Please read our [Contributing Guidelines](CONTRIBUTING.md) and [Code of Conduct](CODE_OF_CONDUCT.md) for more details.
 
-1. Fork the Project
-2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the Branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+## License
 
-## 📄 License
-
-Distributed under the MIT License. See `LICENSE` for more information.
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
 
 ---
 
-Feel free to customize further according to your project's specifics and preferences. This markdown should give your repository a professional and attractive look.
+Thank you for visiting our repository! Feel free to reach out and connect. Let's build and innovate together! 🚀
