@@ -16,7 +16,7 @@ Thank you for considering contributing to J.A.R.V.I.S! We welcome contributions 
 
 ## Code of Conduct
 
-This project adheres to the Contributor Covenant [Code of Conduct](CODE_OF_CONDUCT.md). By participating, you are expected to uphold this code. Please report unacceptable behavior to [maintainer@example.com](mailto:maintainer@example.com).
+This project adheres to the Contributor Covenant [Code of Conduct](CODE_OF_CONDUCT.md). By participating, you are expected to uphold this code. Please report unacceptable behavior to [blackhawk.workonly@gmail.com](mailto:blackhawk.workonly@gmail.com).
 
 ## How Can I Contribute?
 
