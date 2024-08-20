@@ -12,4 +12,4 @@ mouse==0.7.1
 pyautogui==0.9.53
 Pillow==9.5.0
 psutil==5.9.5
-pywikihow==0.0.2
+pywikihow
