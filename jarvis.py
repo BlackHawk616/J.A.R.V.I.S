@@ -9,6 +9,9 @@ import keyboard
 import time
 from time import sleep
 import pywhatkit as kit
+import google.generativeai as genai
+import os
+
 #Youtube Automation
 
 from yt_automate import youtube_search
@@ -91,8 +94,8 @@ from weather import weather
 
 engine = pyttsx3.init('sapi5')
 voices = engine.getProperty('voices')
-print(voices[1].id)
-engine.setProperty('voice',voices[1].id)
+print(voices[0].id)
+engine.setProperty('voice',voices[0].id)
 
 def speak(audio):
     engine.say(audio)
@@ -118,6 +121,52 @@ def take_command():
         return "none"
 
     return query
+
+
+# Configure Gemini AI
+GOOGLE_API_KEY = 'Yours Api Key'
+genai.configure(api_key=GOOGLE_API_KEY)
+
+def list_available_models():
+    try:
+        for m in genai.list_models():
+            print(f"Model: {m.name}")
+            print(f"Display name: {m.display_name}")
+            print(f"Description: {m.description}")
+            print(f"Generation methods: {m.supported_generation_methods}")
+            print("-" * 50)
+    except Exception as e:
+        print(f"Error listing models: {e}")
+
+# List available models
+print("Available Gemini Models:")
+    list_available_models()
+
+# Initialize Gemini model with Flash configuration
+model = genai.GenerativeModel(
+    model_name='gemini-2.0-flash',
+    generation_config={
+        'temperature': 0.7,
+        'top_p': 0.8,
+        'top_k': 40,
+        'max_output_tokens': 2048,
+    }
+)
+
+def get_gemini_response(query):
+    try:
+        # Add system prompt for better context
+        system_prompt = "You are JARVIS, an advanced AI assistant. Provide concise, helpful responses while maintaining a friendly and professional tone. Do not use asterisks or special formatting in your responses."
+        full_prompt = f"{system_prompt}\n\nUser: {query}\nJARVIS:"
+        
+        response = model.generate_content(full_prompt)
+        # Clean up the response by removing asterisks and extra formatting
+        cleaned_response = response.text.replace('*', '').strip()
+        return cleaned_response
+    except Exception as e:
+        print(f"Error getting Gemini response: {e}")
+        return "I apologize, but I'm having trouble processing that request right now."
+
 
 def TaskeExecution():
 
@@ -555,6 +604,12 @@ def TaskeExecution():
 
             enable_vpn()
 
+        else:
+            # If no specific command is recognized, use Gemini AI
+            speak("Let me think about that...")
+            response = get_gemini_response(query)
+            print(f"Gemini: {response}")
+            speak(response)
 
 if __name__ == "__main__":
     while True:
