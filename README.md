@@ -1,6 +1,6 @@
 # JARVIS Clone - Marvel's AI Assistant
 
-![JARVIS](https://i.imgur.com/0y8FQ2B.png)
+![JARVIS](/database/image.png)
 
 This repository contains a Python-based clone of JARVIS, the AI assistant from the Marvel movies. Inspired by Tony Stark's iconic virtual assistant, this project aims to recreate some of the advanced functionalities and interactions seen in the films.
 
