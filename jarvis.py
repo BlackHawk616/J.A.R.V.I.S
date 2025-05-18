@@ -140,7 +140,7 @@ def list_available_models():
 
 # List available models
 print("Available Gemini Models:")
-    list_available_models()
+list_available_models()
 
 # Initialize Gemini model with Flash configuration
 model = genai.GenerativeModel(

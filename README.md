@@ -1,5 +1,6 @@
 # JARVIS Clone - Marvel's AI Assistant
 
+![JARVIS](https://i.imgur.com/0y8FQ2B.png)
 
 This repository contains a Python-based clone of JARVIS, the AI assistant from the Marvel movies. Inspired by Tony Stark's iconic virtual assistant, this project aims to recreate some of the advanced functionalities and interactions seen in the films.
 
@@ -13,11 +14,30 @@ This repository contains a Python-based clone of JARVIS, the AI assistant from t
 - **Space Info:** Retrieve information about space and astronomy.
 - **Music and Spotify Automation:** Control music playback and manage Spotify.
 - **Discord Automation:** Automate tasks on Discord.
+- **AI Chatbot (Google Gemini):** Natural conversation and question answering using Google Gemini 2.0 Flash model.
 
 ## Technologies Used
 
 - **Programming Language:** Python
-- **Libraries:** `pyttsx3`, `requests`, `SpeechRecognition`, `pyjokes`, `pywhatkit`, `pyaudio`, `matplotlib`, `cartopy`, `wikipedia`, `keyboard`, `mouse`, `pyautogui`, `Pillow`, `psutil`, `pywikihow`
+- **Libraries:** `pyttsx3`, `requests`, `SpeechRecognition`, `pyjokes`, `pywhatkit`, `pyaudio`, `matplotlib`, `cartopy`, `wikipedia`, `keyboard`, `mouse`, `pyautogui`, `Pillow`, `psutil`, `pywikihow`, `google-generativeai`
+
+## Google Gemini AI Integration
+
+JARVIS now features seamless integration with Google Gemini (2.0 Flash model), enabling advanced AI-powered conversation and question answering. If a command is not recognized as a script or automation, JARVIS will automatically use Gemini to respond as a chatbot.
+
+### Gemini Setup
+
+1. **Get a Google Gemini API Key:**
+   - Visit [Google AI Studio](https://makersuite.google.com/app/apikey) and generate an API key.
+2. **Set the API Key:**
+   - In `jarvis.py`, set your API key in the `GOOGLE_API_KEY` variable:
+     ```python
+     GOOGLE_API_KEY = 'your_api_key_here'
+     ```
+3. **Install Dependencies:**
+   ```bash
+   pip install google-generativeai
+   ```
 
 ## Getting Started
 
@@ -72,6 +92,8 @@ Make sure you have Python installed on your system. You can download it from [py
         - "Play [song name] on Spotify"
     - **Discord Automation:** 
         - "Send [message] to [channel name] on Discord"
+    - **AI Chatbot:**
+        - Ask any general question or have a conversation. If JARVIS doesn't recognize a command, it will respond using Google Gemini AI.
 
 ## Mouse Click Coordinates Tool
 
