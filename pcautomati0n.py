@@ -1,20 +1,33 @@
 import speech_recognition as sr
-import pyttsx3
 import os
 import time
 import pyautogui
 from time import sleep
 import keyboard
 import psutil
+import platform
+import subprocess
 
-engine = pyttsx3.init('sapi5')
-voices = engine.getProperty('voices')
-print(voices[1].id)
-engine.setProperty('voice',voices[1].id)
+from speech_engine import speak
 
-def speak(audio):
-    engine.say(audio)
-    engine.runAndWait()
+IS_MAC = platform.system() == "Darwin"
+MOD = "command" if IS_MAC else "ctrl"
+
+
+def _open_app(mac_app: str, win_path: str = "") -> None:
+    if IS_MAC:
+        subprocess.run(["open", "-a", mac_app], check=False)
+        return
+    if win_path:
+        os.startfile(win_path)
+
+
+def _close_app(mac_app: str, win_exe: str = "") -> None:
+    if IS_MAC:
+        subprocess.run(["osascript", "-e", f'tell application "{mac_app}" to quit'], check=False)
+        return
+    if win_exe:
+        os.system(f"taskkill /f /im {win_exe}")
 
 def takecommand():
 
@@ -50,7 +63,7 @@ def cpu():
     print("CPU usage is at " + usage)
 
 def refresh():
-    keyboard.press_and_release('ctrl + r')
+    keyboard.press_and_release(f'{MOD}+r')
     speak("Sir Refreshed this Tab")
 
 def pcrefresh():
@@ -59,27 +72,33 @@ def pcrefresh():
 
 def savefile():
     speak('Ok Sir')
-    keyboard.press_and_release('ctrl + s')
+    keyboard.press_and_release(f'{MOD}+s')
 
 def selectall():
     speak("Ok Sir")
-    keyboard.press_and_release('ctrl + A')
+    keyboard.press_and_release(f'{MOD}+a')
 
 def copy():
     speak("OK Sir")
-    keyboard.press_and_release('ctrl + C')
+    keyboard.press_and_release(f'{MOD}+c')
 
 def paste():
     speak("OK Sir")
-    keyboard.press_and_release('ctrl + V')
+    keyboard.press_and_release(f'{MOD}+v')
 
 def taskmanager():
     speak("OK Sir")
-    keyboard.press_and_release('Ctrl + shift + Esc')
+    if IS_MAC:
+        _open_app("Activity Monitor")
+    else:
+        keyboard.press_and_release('Ctrl + shift + Esc')
 
 def close():
     speak("Ok Sir")
-    keyboard.press_and_release('Alt + F4')
+    if IS_MAC:
+        keyboard.press_and_release('command+w')
+    else:
+        keyboard.press_and_release('Alt + F4')
 
 def rename():
     speak("Ok Sir")
@@ -87,65 +106,53 @@ def rename():
 
 def newfolder():
     speak("Ok Sir")
-    keyboard.press('ctrl + Shift + N')
+    keyboard.press_and_release(f'{MOD}+shift+n')
 
 def notepad():
-    apath = "C:\\Windows\\system32\\notepad.exe"
-    os.startfile(apath)
+    _open_app("TextEdit", "C:\\Windows\\system32\\notepad.exe")
 
 def vlcmediaplayer():
-    dpath = "D:\\VLC\\vlc.exe"
-    os.startfile(dpath)
+    _open_app("VLC", "D:\\VLC\\vlc.exe")
 
 def epicgamesstore():
-    epath = "D:\\game devlopement\\Epic Games\\Launcher\\Portal\\Binaries\\Win32\\EpicGamesLauncher.exe"
-    os.startfile(epath)
+    _open_app("Epic Games Launcher", "D:\\game devlopement\\Epic Games\\Launcher\\Portal\\Binaries\\Win32\\EpicGamesLauncher.exe")
 
 def obsstudio():
-    fpath = "C:\\Program Files\\obs-studio\\bin\\64bit\\obs64.exe"
-    os.startfile(fpath)
+    _open_app("OBS", "C:\\Program Files\\obs-studio\\bin\\64bit\\obs64.exe")
 
 def blender():
-    gpath = "C:\\Program Files\\Blender Foundation\\Blender\\blender.exe"   
-    os.startfile(gpath) 
+    _open_app("Blender", "C:\\Program Files\\Blender Foundation\\Blender\\blender.exe")
 
 def tlauncher():
-    hpath = "C:\\Users\\USER\\AppData\\Roaming\\.minecraft\\TLauncher.exe"
-    os.startfile(hpath)
+    _open_app("TLauncher", "C:\\Users\\USER\\AppData\\Roaming\\.minecraft\\TLauncher.exe")
 
 def opera():
-    ipath = "C:\\Users\\USER\\AppData\\Local\\Programs\\Opera GX\\launcher.exe"
-    os.startfile(ipath)
+    _open_app("Opera", "C:\\Users\\USER\\AppData\\Local\\Programs\\Opera GX\\launcher.exe")
 
 def  spotify():
-    jpath = "C:\\Users\\opsri\\AppData\\Roaming\\Spotify\\Spotify.exe"
-    os.startfile(jpath)
+    _open_app("Spotify", "C:\\Users\\opsri\\AppData\\Roaming\\Spotify\\Spotify.exe")
 
 def open_virtual_box():
 
     speak("Ok Sir Opeing Virtual Box")
 
-    kpath = "G:\\Apps\\Virtual Box\\VirtualBox.exe"
-
-    os.startfile(kpath)
+    _open_app("VirtualBox", "G:\\Apps\\Virtual Box\\VirtualBox.exe")
 
 def open_discord():
 
     speak("Ok Sir Opeing Discord")
 
-    lpath = "C:\\Users\\opsri\\AppData\\Local\\Discord\\Update1.exe --processStart Discord.exe"
-
-    os.startfile(lpath)
+    _open_app("Discord", "C:\\Users\\opsri\\AppData\\Local\\Discord\\Update1.exe --processStart Discord.exe")
 
 #def firefox():
     #jpath = 
 
 def switchthewindow():
     speak("switching the window")
-    pyautogui.keyDown("alt")
+    pyautogui.keyDown("command" if IS_MAC else "alt")
     pyautogui.press("tab")
     sleep(1)
-    pyautogui.keyUp("alt")
+    pyautogui.keyUp("command" if IS_MAC else "alt")
 
 def volume_up():
     pyautogui.press("volumeup")
@@ -166,72 +173,75 @@ def unmute_audio():
     speak("Sir Audio unmuted")
 
 def close_windowsmediaplayer():
-    speak("ok Sir closing windows media player")
-    os.system("taskkill /f /im wmplayer.exe")
-    speak("Sir Closed Windows media player")
+    speak("ok Sir closing media player")
+    _close_app("QuickTime Player", "wmplayer.exe")
+    speak("Sir Closed media player")
 
 def close_chrome():
     speak("Ok Sir, closing chrome")
-    os.system("taskkill /f /im chrome.exe")
+    _close_app("Google Chrome", "chrome.exe")
     speak("Sir, Closed Chrome")
 
 def close_opera():
     speak("Ok Sir, Closing opera browser")
-    os.system("taskkill /f /im opera.exe")
+    _close_app("Opera", "opera.exe")
     speak("Sir, Closed Opera")
 
 def close_vscode():
     speak("Ok Sir, closing visual studio code")
-    os.system("taskkill /f /im code.exe")
+    _close_app("Visual Studio Code", "code.exe")
     speak("Sir, Closed Visual Studio Code")
 
 def close_discord():
     speak("Ok Sir, Closing Discord")
-    os.system("taskkill /f /im discord.exe")
+    _close_app("Discord", "discord.exe")
     speak("Sir, Closed Discord")
 
 def close_aducaiy():
     speak("Ok Sir, Closing audacity")
-    os.system("taskkill /f /im audacity.exe")
+    _close_app("Audacity", "audacity.exe")
     speak("Sir, Closed Audacity")
 
 def close_firefox():
     speak("Ok Sir, Closing firefox")
-    os.system("taskkil /f /im firefox.exe")
+    _close_app("Firefox", "firefox.exe")
     speak("Sir, Closed Fire fox")
 
 def close_touchvpn():
     speak("ok Sir, Closing Touch vpn")
-    os.system("taskkill /f /im TouchVpn.exe")
+    _close_app("TouchVPN", "TouchVpn.exe")
     speak("Sir, closed Touch Vpn")
 
 def close_blender():
     speak("Ok Sir, Closing Blender 3d Softare")
-    os.system("taskkill /f /im blender.exe")
+    _close_app("Blender", "blender.exe")
     speak("Sir, Closed Blender")
 
 def close_tlauncher():
     speak("Ok Sir, Closing Tlauncher")
-    os.system("taskkill /f /im java.exe")
+    _close_app("TLauncher", "java.exe")
     speak("Sir, Closed Tlauncher")
 
 def close_minecraft():
     speak("Ok Sir, Closing minecraft")
-    os.system("taskkill /f /im minecraft.exe")
+    _close_app("Minecraft", "minecraft.exe")
     speak("Sir, Closed Minecraft")
 
 def close_d3dgear():
     speak("Ok Sir, Closing D3Dgear")
-    os.system("taskkill /f /im d3dgear.exe")
+    _close_app("D3Dgear", "d3dgear.exe")
     speak("Sir, Closed D3DGEAR")
 
 def close_vlcmediaplayer():
     speak("Ok Sir, Closing vlc media player")
-    os.system("taskkill /f /im vlc.exe")
+    _close_app("VLC", "vlc.exe")
     speak("Sir, closed vlc media player")
         
 def close_this_file():
     speak("Ok Sir, closing This program")
-    keyboard.press('Alt + F4')
+    if IS_MAC:
+        keyboard.press_and_release('command+w')
+    else:
+        keyboard.press('Alt + F4')
     sleep(2)
     speak("Sir, Closed The Program")

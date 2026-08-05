@@ -1,16 +1,7 @@
 from time import sleep
-import pyttsx3
 import speech_recognition as sr
 from pyautogui import click, scroll
-
-engine = pyttsx3.init('sapi5')
-voices = engine.getProperty('voices')
-#print(voices[5].id)
-engine.setProperty('voice',voices[1].id)
-
-def speak(audio):
-    engine.say(audio)
-    engine.runAndWait()
+from speech_engine import speak
 
 def takecommand():
 

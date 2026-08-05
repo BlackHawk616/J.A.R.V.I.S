@@ -1,20 +1,12 @@
 import requests
 import os
 from PIL import Image
-import pyttsx3
 from datetime import datetime
 import cartopy.crs as ccrs
 import matplotlib.pyplot as plt
 import cartopy.trace as crrs
+from speech_engine import speak
 
-engine = pyttsx3.init('sapi5')
-voices = engine.getProperty('voices')
-print(voices[1].id)
-engine.setProperty('voice',voices[1].id)
-
-def speak(audio):
-    engine.say(audio)
-    engine.runAndWait()
 Api_Key = "KrsOGOZLgYGcxYVBLZld2U65PevfTyOfbdqy7ggK"
 
 def Space_Info(Date):

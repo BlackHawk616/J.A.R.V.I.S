@@ -2,15 +2,15 @@ from multiprocessing.spawn import old_main_modules
 from tkinter import E
 from turtle import shape
 from unittest import skip
-import pyttsx3
 import speech_recognition as sr
 import wikipedia
-import keyboard
 import time
 from time import sleep
 import pywhatkit as kit
-import google.generativeai as genai
 import os
+from nim_client import get_nim_response
+from speech_engine import speak, stop_speaking, continue_speaking, should_ignore_query
+from memory import init_memory, add_memory, search_memory, get_memory_context, get_all_memories, extract_remember_payload
 
 #Youtube Automation
 
@@ -90,29 +90,33 @@ from main import reminder_maker
 #weather
 from weather import weather
 
-# Voice Engine
-
-engine = pyttsx3.init('sapi5')
-voices = engine.getProperty('voices')
-print(voices[0].id)
-engine.setProperty('voice',voices[0].id)
-
-def speak(audio):
-    engine.say(audio)
-    engine.runAndWait()
-
 # Take Command Engine
 
 def take_command():
     r = sr.Recognizer()
+
+    # ── Tune sensitivity so ambient noise is ignored ────────────
+    r.energy_threshold = int(os.environ.get("JARVIS_SR_ENERGY", "4000"))
+    r.dynamic_energy_threshold = True
+    r.pause_threshold = 0.8          # seconds of silence before phrase ends
+
     with sr.Microphone() as source:
+        # Calibrate to current background noise level
+        r.adjust_for_ambient_noise(source, duration=0.5)
         print("Listening...")
-        audio = r.listen(source)
+        try:
+            audio = r.listen(source, timeout=5, phrase_time_limit=10)
+        except sr.WaitTimeoutError:
+            return "none"
 
     try:
         print("Recognizing....")
-        query = r.recognize_google(audio, language='en=us')
-        print(f"Use Said : {query}\n")
+        query = r.recognize_google(audio, language='en-US')
+        print(f"User Said : {query}\n")
+
+        # Discard garbage / very short recognitions
+        if len(query.strip()) < 2:
+            return "none"
 
     except Exception as e:
         #print(e)
@@ -123,52 +127,10 @@ def take_command():
     return query
 
 
-# Configure Gemini AI
-GOOGLE_API_KEY = 'Yours Api Key'
-genai.configure(api_key=GOOGLE_API_KEY)
-
-def list_available_models():
-    try:
-        for m in genai.list_models():
-            print(f"Model: {m.name}")
-            print(f"Display name: {m.display_name}")
-            print(f"Description: {m.description}")
-            print(f"Generation methods: {m.supported_generation_methods}")
-            print("-" * 50)
-    except Exception as e:
-        print(f"Error listing models: {e}")
-
-# List available models
-print("Available Gemini Models:")
-list_available_models()
-
-# Initialize Gemini model with Flash configuration
-model = genai.GenerativeModel(
-    model_name='gemini-2.0-flash',
-    generation_config={
-        'temperature': 0.7,
-        'top_p': 0.8,
-        'top_k': 40,
-        'max_output_tokens': 2048,
-    }
-)
-
-def get_gemini_response(query):
-    try:
-        # Add system prompt for better context
-        system_prompt = "You are JARVIS, an advanced AI assistant. Provide concise, helpful responses while maintaining a friendly and professional tone. Do not use asterisks or special formatting in your responses."
-        full_prompt = f"{system_prompt}\n\nUser: {query}\nJARVIS:"
-        
-        response = model.generate_content(full_prompt)
-        # Clean up the response by removing asterisks and extra formatting
-        cleaned_response = response.text.replace('*', '').strip()
-        return cleaned_response
-    except Exception as e:
-        print(f"Error getting Gemini response: {e}")
-        return "I apologize, but I'm having trouble processing that request right now."
-
-
 def TaskeExecution():
+
+    # ── Load persistent memory from vector DB ───────────────
+    init_memory()
 
     WishMe()
 
@@ -180,7 +142,29 @@ def TaskeExecution():
 
         query = take_command().lower()
 
-        if ' wikipedia' in query:  #if wikipedia found in the query then this block will be executed
+        # Skip processing if recognition failed or timed out
+        if query == "none":
+            continue
+
+        # Ignore echo of our own voice
+        if should_ignore_query(query):
+            continue
+
+        # If we got a valid command, stop any active speech immediately
+        stop_speaking()
+
+        # Handle explicit stop and continue commands
+        if "stop" in query or "pause" in query:
+            # We already stopped speaking via stop_speaking(), just acknowledge it
+            speak("Stopped.")
+            continue
+
+        if "continue" in query or "resume" in query:
+            if not continue_speaking():
+                speak("Nothing to continue.")
+            continue
+
+        if 'wikipedia' in query:  #if wikipedia found in the query then this block will be executed
         
             speak('Searching Wikipedia...')
         
@@ -192,155 +176,155 @@ def TaskeExecution():
         
             print(results)
         
-            speak(results)
+            speak(results, blocking=False)
 
             # Music
 
-        elif " play me my self and i" in query:
+        elif "play me my self and i" in query:
                 
             speak("OK Sir")
 
             me_my_self()
 
-        elif " play heat waves" in query:
+        elif "play heat waves" in query:
             
             speak("Ok Sir")
 
             heat_waves()
 
-        elif " play infinity" in query:
+        elif "play infinity" in query:
 
             speak("Ok Sir")
 
             infinity()
 
-        elif " play stereo hearts" in query:
+        elif "play stereo hearts" in query:
 
             speak("Ok Sir")
 
             stereo_hearts()
 
-        elif " play night changes" in query:
+        elif "play night changes" in query:
 
             speak("Ok Sir")
 
             night_changes()
 
-        elif " play unstoppable" in query:
+        elif "play unstoppable" in query:
 
             speak("Ok Sir")
 
             unstoppable()
 
-        elif " play love" in query:
+        elif "play love" in query:
 
             speak("ok Sir")
 
             love()
         
-        elif " play old Town Road" in query:
+        elif "play old town road" in query:
 
             speak("Ok Sir")
 
             Old_Town_Road()
 
-        elif " play begging" in query:
+        elif "play begging" in query:
 
             speak("Ok Sir")
 
             begging()
 
-        elif " play let me down" in query:
+        elif "play let me down" in query:
 
             speak("Ok Sir")
 
             Let_Me_Down()
 
-        elif " play In the middle of the night" in query:
+        elif "play in the middle of the night" in query:
 
             speak("Ok Sir")
 
             In_The_Middle_OF_The_Night()
 
-        elif " play A man With out love" in query:
+        elif "play a man without love" in query:
 
             speak("Ok Sir")
 
             A_Man_Without_Love()
 
-        elif " play weekend" in query:
+        elif "play weekend" in query:
 
             speak("Ok Sir")
 
             startboy_weekend_draft()
 
-        elif " play ture love" in query:
+        elif "play ture love" in query:
 
             speak("Ok Sir")
 
             ture_love()
 
-        elif " play copy" in query:
+        elif "play copy" in query:
 
             speak("Ok Sir")
 
             Copy()
 
-        elif " in youtube" in query:
+        elif "in youtube" in query:
 
             speak("OK Sir")
 
             hoes_no_jujustu()
 
-        elif " play bad liar" in query:
+        elif "play bad liar" in query:
 
             speak("Ok Sir")
 
             Bad_liar()
         
-        elif " play arcade" in query:
+        elif "play arcade" in query:
 
             speak("Ok Sir")
 
             arcade()
 
-        elif " play shape of you" in query:
+        elif "play shape of you" in query:
 
             speak("Ok Sir")
 
             Shape_OF_You()
 
-        elif " play blinding lights" in query:
+        elif "play blinding lights" in query:
 
             speak("Ok Sir")
 
             blinding_lights()
 
-        elif " play one dance" in query:
+        elif "play one dance" in query:
 
             speak("Ok Sir")
 
             One_Dance()
 
-        elif " playing Billie Eilliesh" in query:
+        elif "playing billie eilliesh" in query:
 
             speak("Ok Sir")
 
             Billie_eiliesh()
 
-        elif " play one kiss" in query:
+        elif "play one kiss" in query:
 
             speak("Ok Sir")
 
             One_Kiss()
 
-        elif " play i dont care" in query:
+        elif "play i dont care" in query:
 
             speak("Ok Sir")
 
             idfc()
 
-        elif " play my playlist in spotify" in query:
+        elif "play my playlist in spotify" in query:
 
             speak("starting spotify playlist automation")
 
@@ -353,223 +337,249 @@ def TaskeExecution():
 
         # Youtube Automation
 
-        elif " Search In Youtube " in query:
+        elif "search in youtube" in query:
 
             youtube_search()
 
-        elif " pause video" in query:
+        elif "pause video" in query:
 
             pause_video()
         
-        elif " resume video" in query:
+        elif "resume video" in query:
 
             resume_video()
 
-        elif " skip 10 seconds forward" in query:
+        elif "skip 10 seconds forward" in query:
 
             skip_10_seconds_forward()
 
-        elif " rewind 10 seconds back" in query:
+        elif "rewind 10 seconds back" in query:
 
             rewind_10_seconds_back()
 
-        elif " skip add" in query:
+        elif "skip add" in query:
 
             skip_ad()
 
-        elif " like video" in query:
+        elif "like video" in query:
 
             like_video()
 
-        elif " fullscreen mode" in query:
+        elif "fullscreen mode" in query:
 
             fullscreen()
 
-        elif " therather mode" in query:
+        elif "therather mode" in query:
 
             therather_mode()
 
-        elif " tell me a joke" in query:
+        elif "tell me a joke" in query:
 
             speak("Ok Sir, Please Wait I am Finding A joke For You")
 
             jokes()
 
-        elif " hide your files" in query:
+        elif "hide your files" in query:
 
             speak("Ok Sir, Hiding My Files")
 
             hide()
 
-        elif " unhide your files" in query:
+        elif "unhide your files" in query:
 
             speak("Ok Sir, Unhiding My files")
 
-        elif " Turn On How To Do" in query:
+        elif "turn on how to do" in query:
 
             speak("Ok Sir")
 
             activate_how_to_do_mode()
 
-        elif " Remember This" in query:
+        elif "what do you remember" in query:
 
-            reminder_maker()
+            memories = get_all_memories()
+            if memories:
+                speak(f"Sir, I have {len(memories)} things in my memory.")
+                for mem in memories[:5]:  # Read at most 5 aloud
+                    print(mem)
+                    speak(mem)
+                if len(memories) > 5:
+                    speak(f"And {len(memories) - 5} more memories stored.")
+            else:
+                speak("My memory is empty Sir. Tell me to remember something.")
 
-        elif " take screenshot" in query:
+        elif "remember" in query:
+
+            payload = extract_remember_payload(query)
+            if payload:
+                bullet = add_memory(payload)
+                speak("Got it Sir. I will remember that.")
+                print(f"[Memory] {bullet}")
+            else:
+                speak("Sir, what should I remember?")
+                mem_data = take_command()
+                if mem_data != "none":
+                    bullet = add_memory(mem_data)
+                    speak("Got it Sir. I will remember that.")
+                    print(f"[Memory] {bullet}")
+                else:
+                    speak("I didn't catch that Sir.")
+
+        elif "take screenshot" in query:
 
             screenshot()
 
         # Pc Automation
 
-        elif " what is the ram usage" in query:
+        elif "what is the ram usage" in query:
 
             ram_usage()
 
-        elif " what is the cpu usage" in query:
+        elif "what is the cpu usage" in query:
 
             cpu()
 
-        elif " refresh this tab" in query:
+        elif "refresh this tab" in query:
 
             refresh()
 
-        elif " save this file" in query:
+        elif "save this file" in query:
 
             savefile()
 
-        elif " select all" in query:
+        elif "select all" in query:
 
             selectall()
 
-        elif " copy this" in query:
+        elif "copy this" in query:
 
             copy()
 
-        elif " paste it here" in query:
+        elif "paste it here" in query:
 
             paste()
 
-        elif " open taskmanager" in query:
+        elif "open taskmanager" in query:
 
             taskmanager()
 
-        elif " close this " in query:
+        elif "close this" in query:
 
             close()
 
-        elif " rename this " in query:
+        elif "rename this" in query:
 
             rename()
 
-        elif " make a new folder here" in query:
+        elif "make a new folder here" in query:
 
             newfolder()
 
-        elif " open notepad" in query:
+        elif "open notepad" in query:
 
                 notepad()
 
-        elif " open vlc media player" in query:
+        elif "open vlc media player" in query:
 
             vlcmediaplayer()
 
-        elif " open epic games store" in query:
+        elif "open epic games store" in query:
 
             epicgamesstore()
 
-        elif " open obs studio" in query:
+        elif "open obs studio" in query:
 
             obsstudio()
 
-        elif " open blender" in query:
+        elif "open blender" in query:
 
             blender()
 
-        elif " open tlauncher" in query:
+        elif "open tlauncher" in query:
 
             tlauncher()
 
-        elif " open opera" in query:
+        elif "open opera" in query:
 
             opera()
 
-        elif " open spotify" in query:
+        elif "open spotify" in query:
 
             spotify()
 
-        elif " switch the window" in query:
+        elif "switch the window" in query:
 
             switchthewindow()
 
-        elif " increase volume" in query:
+        elif "increase volume" in query:
 
             volume_up()
 
-        elif " decrease volume" in query:
+        elif "decrease volume" in query:
             
             volume_down()
 
-        elif " mute audio" in query:
+        elif "mute audio" in query:
 
             mute_audio()
         
-        elif " unmute audio" in query:
+        elif "unmute audio" in query:
 
             unmute_audio()
 
-        elif  " close windows media player" in query:
+        elif "close windows media player" in query:
 
             close_windowsmediaplayer()
 
-        elif " close chrome" in query:
+        elif "close chrome" in query:
 
             close_chrome()
 
-        elif " close opera " in query:
+        elif "close opera" in query:
 
             close_opera()
 
-        elif " close visual code" in query:
+        elif "close visual code" in query:
 
             close_vscode()
         
-        elif " close discord " in query:
+        elif "close discord" in query:
 
             close_discord()
 
-        elif " close fire fox" in query:
+        elif "close fire fox" in query:
 
             close_firefox()
 
-        elif " close bleneder" in query:
+        elif "close bleneder" in query:
 
             close_blender()
         
-        elif " close t launcher" in query:
+        elif "close t launcher" in query:
 
             close_tlauncher()
 
-        elif " close minecraft" in query:
+        elif "close minecraft" in query:
 
             close_minecraft()
 
-        elif " close vlc media player" in query:
+        elif "close vlc media player" in query:
 
             close_vlcmediaplayer()
 
-        elif " close this " in query:
+        elif "close this" in query:
 
             close_this_file()
 
-        elif " what is the weather forecast" in query:
+        elif "what is the weather forecast" in query:
 
             weather()
 
-        elif " whats the current date" in query:
+        elif "whats the current date" in query:
 
             date()
 
-        elif " search in google" in query:
+        elif "search in google" in query:
 
             speak("Ok Sir")
 
@@ -580,40 +590,42 @@ def TaskeExecution():
             sleep(2)
             speak("Done Sir!")
 
-        elif " open history" in query:
+        elif "open history" in query:
 
             history()
 
-        elif " open downloads" in query:
+        elif "open downloads" in query:
 
             downloads()
 
-        elif " open new tab" in query:
+        elif "open new tab" in query:
 
             new_tab()
     
-        elif " open new window in incognito mode" in query:
+        elif "open new window in incognito mode" in query:
 
             new_window_in_incognito_mode()
 
-        elif " switch tab" in query:
+        elif "switch tab" in query:
 
             switch_Tab()
 
-        elif " enable vpn" in query:
+        elif "enable vpn" in query:
 
             enable_vpn()
 
         else:
-            # If no specific command is recognized, use Gemini AI
-            speak("Let me think about that...")
-            response = get_gemini_response(query)
-            print(f"Gemini: {response}")
-            speak(response)
+            # If no specific command is recognized, use fallback AI
+            # Search memory for relevant context to personalize the response
+            memory_ctx = get_memory_context(query)
+            response = get_nim_response(query, memory_context=memory_ctx)
+            print(f"Fallback AI: {response}")
+            speak(response, blocking=False)
 
 if __name__ == "__main__":
     while True:
         permission = take_command()
-        if "wake up " in permission:
+        if permission == "none":
+            continue
+        if "wake up" in permission.lower():
             TaskeExecution()
-         

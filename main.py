@@ -1,38 +1,45 @@
 import datetime
 import os
+import platform
+import subprocess
 from calendar import month
 from time import sleep
 
 import pyjokes
 import pyscreeze
-import pyttsx3
 import speech_recognition as sr
 from pyautogui import click
 from pywikihow import search_wikihow
-
-# Voice Engine
-
-engine = pyttsx3.init('sapi5')
-voices = engine.getProperty('voices')
-print(voices[1].id)
-engine.setProperty('voice',voices[1].id)
-
-def speak(audio):
-    engine.say(audio)
-    engine.runAndWait()
+from speech_engine import speak
+from memory import add_memory
 
 # Take Command Engine
 
 def take_command():
     r = sr.Recognizer()
+
+    # ── Tune sensitivity so ambient noise is ignored ────────────
+    r.energy_threshold = int(os.environ.get("JARVIS_SR_ENERGY", "4000"))
+    r.dynamic_energy_threshold = True
+    r.pause_threshold = 0.8          # seconds of silence before phrase ends
+
     with sr.Microphone() as source:
+        # Calibrate to current background noise level
+        r.adjust_for_ambient_noise(source, duration=0.5)
         print("Listening...")
-        audio = r.listen(source)
+        try:
+            audio = r.listen(source, timeout=5, phrase_time_limit=10)
+        except sr.WaitTimeoutError:
+            return "none"
 
     try:
         print("Recognizing....")
-        query = r.recognize_google(audio, language='en=us')
-        print(f"Use Said : {query}\n")
+        query = r.recognize_google(audio, language='en-US')
+        print(f"User Said : {query}\n")
+
+        # Discard garbage / very short recognitions
+        if len(query.strip()) < 2:
+            return "none"
 
     except Exception as e:
         #print(e)
@@ -103,17 +110,21 @@ def jokes():
     
     print(j)
 
-    speak(j)
+    speak(j, blocking=False)
 
 def hide():
-
-    os.system("attrib +h /s /d")
+    if platform.system() == "Darwin":
+        subprocess.run("find . -maxdepth 1 -mindepth 1 -exec chflags hidden {} +", shell=True, check=False)
+    else:
+        os.system("attrib +h /s /d")
 
     speak("Sir All Files Are Hidden Now")
 
 def unhide():
-
-    os.system("attrib -h /s /d")
+    if platform.system() == "Darwin":
+        subprocess.run("find . -maxdepth 1 -mindepth 1 -exec chflags nohidden {} +", shell=True, check=False)
+    else:
+        os.system("attrib -h /s /d")
 
     speak("All Files Are Visible Sir")
 
@@ -139,15 +150,13 @@ def reminder_maker():
 
     d2ata = take_command()
 
-    speak("Sir, You Said To Remember That" + d2ata)  # type: ignore
-
-    reminder_file = open("data.txt", 'a')
-
-    reminder_file.write('\n')
-
-    reminder_file.write(d2ata)  # type: ignore
-
-    reminder_file.close()
+    if d2ata and d2ata != "none":
+        speak("Sir, You Said To Remember That " + d2ata)
+        bullet = add_memory(d2ata)
+        speak("Stored in my memory Sir.")
+        print(f"[Memory] {bullet}")
+    else:
+        speak("I didn't catch that Sir.")
 
 def introuce():
 

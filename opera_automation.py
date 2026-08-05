@@ -1,20 +1,18 @@
-import pyttsx3
 import speech_recognition as sr
 import pywhatkit as kit
 import keyboard
+import platform
 from pyautogui import click
 from time import sleep
-import mouse
 from pywhatkit import sc
+from speech_engine import speak
 
-engine = pyttsx3.init('sapi5')
-voices = engine.getProperty('voices')
-print(voices[1].id)
-engine.setProperty('voice',voices[1].id)
+try:
+    import mouse
+except Exception:
+    mouse = None
 
-def speak(audio):
-    engine.say(audio)
-    engine.runAndWait()
+MOD = "command" if platform.system() == "Darwin" else "ctrl"
 
 # Take Command Engine
 
@@ -50,25 +48,25 @@ def google_search():
 def history():
 
     speak("Ok Sir, opning history in opera")
-    keyboard.press('CTRL+H')
+    keyboard.press_and_release(f'{MOD}+h')
     speak("Sir, opened history in opera")
 
 def downloads():
 
     speak("Ok Sir, opening downloads in chrome")
-    keyboard.press('CTRL + J')
+    keyboard.press_and_release(f'{MOD}+j')
     speak("Sir, opened downloads in chrome")    
 
 def new_tab():
 
     speak("Ok Sir, opening new tab in chrome")
-    keyboard.press('Ctrl + n')
+    keyboard.press_and_release(f'{MOD}+n')
     speak("Sir opened new tab")
 
 def new_window_in_incognito_mode():
 
     speak("Ok Sir opening new window in Incognito mode")
-    keyboard.press('Ctrl + Shift + n')
+    keyboard.press_and_release(f'{MOD}+shift+n')
     speak("Sir, opened new window in Incognito mode")
 
 def switch_workspaces():
@@ -80,7 +78,10 @@ def switch_workspaces():
 def switch_Tab():
     
     speak("Ok Sir Switching The Tab")
-    keyboard.press_and_release('Alt + Tab')
+    if platform.system() == "Darwin":
+        keyboard.press_and_release('command+tab')
+    else:
+        keyboard.press_and_release('alt+tab')
     speak("Sir switched Tab")
 
 def enable_vpn():
@@ -130,7 +131,8 @@ def disable_darkpage():
 
     click()
 
-    mouse.click('right')
+    if mouse is not None:
+        mouse.click('right')
 
     click()
 
@@ -140,7 +142,7 @@ def close_this_tab():
 
     speak("Ok Sir, closing This Tab")
     
-    keyboard.press("CTRL + Tab")
+    keyboard.press_and_release(f'{MOD}+w')
 
     speak("sir Closed This Tab")
 
