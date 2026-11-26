@@ -12,7 +12,7 @@ pyautogui>=0.9.54
 Pillow>=10.4.0
 psutil>=5.9.5
 pywikihow
-kittentts @ git+https://github.com/KittenML/KittenTTS.git
+kittenml
 sounddevice==0.5.5
 openai>=1.0.0
 chromadb>=0.6.0

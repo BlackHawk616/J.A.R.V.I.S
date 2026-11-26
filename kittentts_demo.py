@@ -2,13 +2,15 @@
 
 import argparse
 import sys
+from typing import cast
 
 import sounddevice as sd
-from kittentts import KittenTTS
+from kittenml.get_model import KittenTTS
+from kittenml.kittentts_legacy.model import KittenTTSOnnx
 
 SAMPLE_RATE = 24000
 DEFAULT_MODEL = "KittenML/kitten-tts-nano-0.8"
-DEFAULT_VOICE = "Luna"
+DEFAULT_VOICE = "Bruno"
 
 
 def parse_args() -> argparse.Namespace:
@@ -17,7 +19,7 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--text",
-        default="Hello from JARVIS and Kitten TTS. This is direct speaker output.",
+        default="Hello, Charan! I am MARK 1.O. your personal AI assistant.",
         help="Text to synthesize.",
     )
     parser.add_argument(
@@ -26,15 +28,15 @@ def parse_args() -> argparse.Namespace:
         help="Voice name (for example: Bella, Jasper, Luna, Bruno, Rosie, Hugo, Kiki, Leo).",
     )
     parser.add_argument(
-        "--speed",
-        type=float,
-        default=1.0,
-        help="Speech speed multiplier.",
-    )
-    parser.add_argument(
         "--model",
         default=DEFAULT_MODEL,
         help="Hugging Face model id.",
+    )
+    parser.add_argument(
+        "--speed",
+        type=float,
+        default=1.4,
+        help="Speech speed multiplier.",
     )
     parser.add_argument(
         "--list-voices",
@@ -48,7 +50,7 @@ def main() -> int:
     args = parse_args()
 
     print(f"Loading model: {args.model}")
-    model = KittenTTS(args.model)
+    model = cast(KittenTTSOnnx, KittenTTS(args.model))
 
     if args.list_voices:
         print("Available voices:", ", ".join(model.available_voices))
